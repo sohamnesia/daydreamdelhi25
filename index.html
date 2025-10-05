@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Last Light - Infinite Survival</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Title Screen -->
+        <div id="titleScreen" class="screen">
+            <div class="title-content">
+                <h1 class="game-title">The Last Light</h1>
+                <p class="theme-text">Survive Until the End</p>
+                <div class="high-score-display">
+                    <div class="score-stats">
+                        <p>Best Score: <span id="bestScore">0</span></p>
+                        <p>Longest Survival: <span id="longestSurvival">0</span>s</p>
+                        <p>Most Ships Saved: <span id="mostShipsSaved">0</span></p>
+                    </div>
+                </div>
+                <div class="instructions">
+                    <p><strong>Infinite Survival Mode</strong></p>
+                    <p>Guide ships to safety with your lighthouse beam</p>
+                    <p>Hold MOUSE or SPACEBAR to activate the light</p>
+                    <p>Shop opens every 150 points - spend wisely!</p>
+                    <br>
+                    <p><strong>Ship Types:</strong></p>
+                    <p>⛵ Fishing Boat: 15 points (fast)</p>
+                    <p>🚢 Cargo Ship: 25 points (medium)</p>
+                    <p>🛳️ Cruise Ship: 50 points (slow, needs more light)</p>
+                    <br>
+                    <p><strong>Survival Challenge:</strong></p>
+                    <p>Difficulty increases over time</p>
+                    <p>Storm events become more frequent</p>
+                    <p>Ships spawn faster and move quicker</p>
+                    <p>Game ends when fuel reaches zero</p>
+                </div>
+                <button class="btn btn--primary btn--lg" onclick="startGame()">Start Survival</button>
+                <button class="btn btn--secondary" onclick="toggleSound()">
+                    <span id="soundToggle">🔊 Sound: ON</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="screen hidden">
+            <div class="game-ui">
+                <div class="ui-left">
+                    <div class="fuel-container">
+                        <label>Fuel</label>
+                        <div class="fuel-bar">
+                            <div id="fuelFill" class="fuel-fill"></div>
+                            <div class="fuel-warning" id="fuelWarning"></div>
+                        </div>
+                    </div>
+                    <div class="survival-info">
+                        <div>Survival: <span id="survivalTime">0</span>s</div>
+                        <div class="difficulty-indicator">
+                            <span>Difficulty: <span id="difficultyLevel">1</span></span>
+                        </div>
+                        <div class="next-shop">
+                            Next Shop: <span id="nextShopAt">150</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-center">
+                    <button class="btn btn--secondary btn--sm" onclick="pauseGame()" id="pauseBtn">⏸️ Pause</button>
+                </div>
+                <div class="ui-right">
+                    <div class="score-display">
+                        <div>Score: <span id="score">0</span> <span id="scoreMultiplier" class="multiplier hidden">×1.0</span></div>
+                        <div>Ships Saved: <span id="shipsSaved">0</span></div>
+                        <div>Combo: <span id="combo">0</span></div>
+                        <div class="best-indicator">Best: <span id="bestScoreGame">0</span></div>
+                    </div>
+                </div>
+            </div>
+            <canvas id="gameCanvas" width="800" height="600"></canvas>
+            <div class="game-controls">
+                <p>Hold MOUSE or SPACEBAR to activate lighthouse • ESC to pause</p>
+            </div>
+        </div>
+
+        <!-- Shop Screen -->
+        <div id="shopScreen" class="screen hidden">
+            <div class="shop-content">
+                <h2>Lighthouse Shop</h2>
+                <div class="shop-header">
+                    <div class="shop-available-info">
+                        <p>🛍️ SHOP AVAILABLE - Spend Your Points!</p>
+                        <p>Available Points: <span id="shopPoints">0</span></p>
+                        <p>Shop Visit #<span id="shopVisitNumber">1</span> - Prices have increased!</p>
+                    </div>
+                </div>
+                <div class="shop-grid" id="shopGrid">
+                    <!-- Shop items will be populated by JavaScript -->
+                </div>
+                <div class="shop-actions">
+                    <button class="btn btn--primary btn--lg" onclick="continueFromShop()">Continue Survival</button>
+                    <button class="btn btn--secondary" onclick="skipShop()">Skip Shop</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pause Screen -->
+        <div id="pauseScreen" class="screen hidden">
+            <div class="pause-content">
+                <h2>Game Paused</h2>
+                <div class="pause-stats">
+                    <p>Current Score: <span id="pauseScore">0</span></p>
+                    <p>Ships Saved: <span id="pauseShipsSaved">0</span></p>
+                    <p>Survival Time: <span id="pauseSurvival">0</span>s</p>
+                    <p>Difficulty Level: <span id="pauseDifficulty">1</span></p>
+                </div>
+                <div class="pause-actions">
+                    <button class="btn btn--primary btn--lg" onclick="resumeGame()">Resume Game</button>
+                    <button class="btn btn--secondary" onclick="restartFromPause()">Restart Survival</button>
+                    <button class="btn btn--outline" onclick="quitToTitle()">Quit to Title</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Over Screen -->
+        <div id="gameOverScreen" class="screen hidden">
+            <div class="game-over-content">
+                <h2>Survival Complete</h2>
+                <div class="final-stats">
+                    <p class="final-score">Final Score: <span id="finalScore">0</span></p>
+                    <p class="ships-saved-final">Ships Saved: <span id="finalShipsSaved">0</span></p>
+                    <p class="survival-time-final">Survival Time: <span id="finalSurvivalTime">0</span>s</p>
+                    <p class="difficulty-reached">Difficulty Reached: <span id="difficultyReached">1</span></p>
+                    <div class="achievement-notices" id="achievementNotices">
+                        <!-- Achievement notices will be populated by JavaScript -->
+                    </div>
+                </div>
+                <div class="sacrifice-message">
+                    <p id="sacrificeMessage">Your lighthouse ran out of fuel, but your sacrifice saved many souls from the darkness.</p>
+                </div>
+                <button class="btn btn--primary btn--lg" onclick="restartGame()">Try Again</button>
+                <button class="btn btn--secondary" onclick="goToTitle()">Back to Title</button>
+            </div>
+        </div>
+
+        <!-- Storm Event Overlay -->
+        <div id="stormOverlay" class="storm-overlay hidden">
+            <div class="storm-message">
+                <h3>⚡ STORM APPROACHING ⚡</h3>
+                <p>Ships move faster but points are doubled!</p>
+            </div>
+        </div>
+
+        <!-- Milestone Notification -->
+        <div id="milestoneNotification" class="milestone-notification hidden">
+            <div class="milestone-content">
+                <h3>🎉 MILESTONE REACHED! 🎉</h3>
+                <p id="milestoneMessage"></p>
+            </div>
+        </div>
+
+        <!-- Audio Elements -->
+        <audio id="oceanAmbient" loop>
+            <source src="data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ4AAAA=" type="audio/wav">
+        </audio>
+        <audio id="lighthouseOn">
+            <source src="data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ4AAAA=" type="audio/wav">
+        </audio>
+        <audio id="shipSaved">
+            <source src="data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ4AAAA=" type="audio/wav">
+        </audio>
+        <audio id="shipCrashed">
+            <source src="data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ4AAAA=" type="audio/wav">
+        </audio>
+        <audio id="fuelWarningSound">
+            <source src="data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ4AAAA=" type="audio/wav">
+        </audio>
+        <audio id="roundComplete">
+            <source src="data:audio/wav;base64,UklGRjIAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ4AAAA=" type="audio/wav">
+        </audio>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
